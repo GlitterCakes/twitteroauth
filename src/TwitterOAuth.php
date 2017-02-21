@@ -236,6 +236,39 @@ class TwitterOAuth extends Config
         }
     }
 
+	/**
+	 * Keeps checking status of upload up to 10 times waiting for to be processed
+	 * 
+	 * @param string $mediaId
+	 * 
+	 * @return boolean
+	 */
+	public function pauseForUpload($mediaId)
+	{
+		// Check the status 5 times seperated by 5 seconds
+		$checkCount = 0;
+		while($checkCount < 10) {
+			
+			// Get status of media processing
+			$response = $this->http('GET', self::UPLOAD_HOST, 'media/upload', [
+				'command' => 'STATUS',
+				'media_id' => $mediaId
+			]);
+			
+			// If this passed, we're done here
+			if ($response->processing_info->state == 'succeeded') {
+				return true;
+			}
+			
+			// Wait 5 seconds and Increment counter
+			sleep(5);
+			$checkCount++;
+		}
+		
+		// Timed out waiting
+		return false;
+	}
+	
     /**
      * Private method to upload media (not chunked) to upload.twitter.com.
      *
@@ -262,12 +295,20 @@ class TwitterOAuth extends Config
      */
     private function uploadMediaChunked($path, array $parameters)
     {
-        // Init
-        $init = $this->http('POST', self::UPLOAD_HOST, $path, [
-            'command' => 'INIT',
+		// Request parameters
+		$requestParams = [
+			'command' => 'INIT',
             'media_type' => $parameters['media_type'],
             'total_bytes' => filesize($parameters['media'])
-        ]);
+		];
+		
+		// Add media category if we specified it
+		if(array_key_exists('media_category', $parameters)) {
+			$requestParams['media_category'] = $parameters['media_category'];
+		}
+		
+        // Init
+        $init = $this->http('POST', self::UPLOAD_HOST, $path, $requestParams);
         // Append
         $segment_index = 0;
         $media = fopen($parameters['media'], 'rb');
