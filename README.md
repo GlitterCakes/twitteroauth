@@ -8,3 +8,5 @@ See documentation at https://twitteroauth.com.
 PHP versions [listed](https://secure.php.net/supported-versions.php) as "active support" or "security fixes only" are supported.
 
 <img src="https://raw.githubusercontent.com/abraham/twitteroauth-demo/master/images/twitter-logo-blue.png" itemprop="image" alt="Twitter bird" width="200px">
+
+This version is a fork of the original. We've included fixes for large video uploads and have refactored scope on function declarations for ease of abstraction.
