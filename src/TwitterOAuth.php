@@ -284,7 +284,7 @@ class TwitterOAuth extends Config
 			$response = $this->http('GET', self::UPLOAD_HOST, 'media/upload', [
 				'command' => 'STATUS',
 				'media_id' => $mediaId
-			]);
+			], false);
 
 			// If this passed, we're done here
 			if ($response->processing_info->state == 'succeeded') {
